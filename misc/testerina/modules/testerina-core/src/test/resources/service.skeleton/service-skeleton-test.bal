@@ -26,10 +26,10 @@ function testService () {
     var response = httpEndpoint -> get("/pets");
     match response {
                http:Response resp => {
-                    var strRes = resp.getStringPayload();
+                    var strRes = resp.getTextPayload();
                     string expected = "Sample listPets Response";
                     test:assertEquals(strRes, expected);
                }
-               http:HttpConnectorError err => test:assertFail(msg = "Failed to call the endpoint: "+uri);
+               error err => test:assertFail(msg = "Failed to call the endpoint: "+uri);
     }
 }

@@ -51,7 +51,7 @@ public type Cache object {
         float evictionFactor;
     }
 
-    new (expiryTimeMillis = 900000, capacity = 100, evictionFactor = 0.25) {
+    public new(expiryTimeMillis = 900000, capacity = 100, evictionFactor = 0.25) {
         // Cache expiry time must be a positive value.
         if (expiryTimeMillis <= 0) {
             error e = {message:"Expiry time must be greater than 0."};
@@ -126,8 +126,8 @@ public type Cache object {
     }
 
     documentation {
-        Returns the cached value associated with the given key. If the provided cache key is not found, an error will
-        be thrown. So use the hasKey function to check for the existance of a particular key.
+        Returns the cached value associated with the given key. If the provided cache key is not found, ()
+        will be returned.
 
         R{{key}} key which is used to retrieve the cached value
         R{{}}The cached value associated with the given key

@@ -16,6 +16,7 @@
  */
 package org.ballerinalang.test.types.stream;
 
+import org.ballerinalang.launcher.util.BAssertUtil;
 import org.ballerinalang.launcher.util.BCompileUtil;
 import org.ballerinalang.launcher.util.BRunUtil;
 import org.ballerinalang.launcher.util.CompileResult;
@@ -37,10 +38,33 @@ import java.util.Objects;
 public class BStreamValueTest {
 
     private CompileResult result;
+    private CompileResult failureResult;
 
     @BeforeClass
     public void setup() {
         result = BCompileUtil.compile("test-src/types/stream/stream-value.bal");
+        failureResult = BCompileUtil.compile("test-src/types/stream/stream-negative.bal");
+    }
+
+    @Test(description = "Test streams for invalid scenarios")
+    public void testConstrainedStreamNegative() {
+        Assert.assertEquals(failureResult.getErrorCount(), 8);
+        BAssertUtil.validateError(failureResult, 0, "incompatible types: expected 'stream<int>',"
+                                  + " found 'stream'", 14, 12);
+        BAssertUtil.validateError(failureResult, 1, "incompatible types: expected 'stream<int>',"
+                                  + " found 'stream<string>'", 19, 12);
+        BAssertUtil.validateError(failureResult, 2, "incompatible types: expected"
+                                  + " 'stream<Person>', found 'stream<Employee>'", 24, 37);
+        BAssertUtil.validateError(failureResult, 3, "incompatible types: expected"
+                                  + " 'stream<Person>', found 'stream'", 30, 37);
+        BAssertUtil.validateError(failureResult, 4, "incompatible types: 'stream<Employee>'"
+                                  + " cannot be converted to 'stream<Person>'", 41, 24);
+        BAssertUtil.validateError(failureResult, 5, "incompatible types: 'Employee' cannot be"
+                                  + " converted to 'stream<int>'", 48, 17);
+        BAssertUtil.validateError(failureResult, 6, "incompatible types: 'stream<Person>' cannot"
+                                  + " be converted to 'stream<Employee>'", 55, 26);
+        BAssertUtil.validateError(failureResult, 7, "incompatible types: 'any' cannot be"
+                                  + " converted to 'stream<Employee>'", 63, 18);
     }
 
     @Test(description = "Test publishing objects of invalid type to a stream",
@@ -68,11 +92,11 @@ public class BStreamValueTest {
         BStruct modifiedOrigEmployee = (BStruct) returns[2];
         Assert.assertEquals(origEmployee.getIntField(0), 0);
         Assert.assertTrue(origEmployee.getStringField(0).isEmpty());
-        Assert.assertTrue(Objects.equals(publishedEmployee.getType().getName(),
-                                         modifiedOrigEmployee.getType().getName()));
-        Assert.assertEquals(publishedEmployee.getIntField(0), modifiedOrigEmployee.getIntField(0),
+        Assert.assertTrue(Objects.equals(modifiedOrigEmployee.getType().getName(),
+                                         publishedEmployee.getType().getName()));
+        Assert.assertEquals(modifiedOrigEmployee.getIntField(0), publishedEmployee.getIntField(0),
                             "Object field \"id\" of received event does not match that of published event");
-        Assert.assertEquals(publishedEmployee.getStringField(0), modifiedOrigEmployee.getStringField(0),
+        Assert.assertEquals(modifiedOrigEmployee.getStringField(0), publishedEmployee.getStringField(0),
                             "Object field \"name\" of received event does not match that of published event");
     }
 
@@ -86,9 +110,9 @@ public class BStreamValueTest {
         Assert.assertTrue(origEmployee.getStringField(0).isEmpty());
         Assert.assertTrue(Objects.equals(publishedEmployee.getType().getName(),
                                          modifiedOrigEmployee.getType().getName()));
-        Assert.assertEquals(publishedEmployee.getIntField(0), modifiedOrigEmployee.getIntField(0),
+        Assert.assertEquals(modifiedOrigEmployee.getIntField(0), publishedEmployee.getIntField(0),
                             "Object field \"id\" of received event does not match that of published event");
-        Assert.assertEquals(publishedEmployee.getStringField(0), modifiedOrigEmployee.getStringField(0),
+        Assert.assertEquals(modifiedOrigEmployee.getStringField(0), publishedEmployee.getStringField(0),
                             "Object field \"name\" of received event does not match that of published event");
     }
 
@@ -100,16 +124,16 @@ public class BStreamValueTest {
 
         Assert.assertNotNull(publishedEmployeeEvents);
         Assert.assertNotNull(receivedEmployeeEvents);
-        Assert.assertEquals(publishedEmployeeEvents.size(), receivedEmployeeEvents.size(), "Number of Employee "
+        Assert.assertEquals(receivedEmployeeEvents.size(), publishedEmployeeEvents.size(), "Number of Employee "
                 + "Events received does not match the number published");
         for (int i = 0; i < publishedEmployeeEvents.size(); i++) {
             BStruct publishedEmployeeEvent = (BStruct) publishedEmployeeEvents.get(i);
             BStruct receivedEmployeeEvent = (BStruct) receivedEmployeeEvents.get(i);
             Assert.assertTrue(Objects.equals(publishedEmployeeEvent.getType().getName(),
                                              receivedEmployeeEvent.getType().getName()));
-            Assert.assertEquals(publishedEmployeeEvent.getIntField(0), receivedEmployeeEvent.getIntField(0),
+            Assert.assertEquals(receivedEmployeeEvent.getIntField(0), publishedEmployeeEvent.getIntField(0),
                                 "Object field \"id\" of received event does not match that of published event");
-            Assert.assertEquals(publishedEmployeeEvent.getStringField(0), receivedEmployeeEvent.getStringField(0),
+            Assert.assertEquals(receivedEmployeeEvent.getStringField(0), publishedEmployeeEvent.getStringField(0),
                                 "Object field \"name\" of received event does not match that of published event");
         }
     }
@@ -122,10 +146,10 @@ public class BStreamValueTest {
 
         Assert.assertNotNull(publishedIntegerEvents);
         Assert.assertNotNull(receivedIntegerEvents);
-        Assert.assertEquals(publishedIntegerEvents.size(), receivedIntegerEvents.size(), "Number of Integer "
+        Assert.assertEquals(receivedIntegerEvents.size(), publishedIntegerEvents.size(), "Number of Integer "
                 + "Events received does not match the number published");
         for (int i = 0; i < publishedIntegerEvents.size(); i++) {
-            Assert.assertEquals(publishedIntegerEvents.get(i), receivedIntegerEvents.get(i),
+            Assert.assertEquals(receivedIntegerEvents.get(i), publishedIntegerEvents.get(i),
                                 "Received Integer event does not match the published boolean event");
         }
     }
@@ -138,10 +162,10 @@ public class BStreamValueTest {
 
         Assert.assertNotNull(publishedBooleanEvents);
         Assert.assertNotNull(receivedBooleanEvents);
-        Assert.assertEquals(publishedBooleanEvents.size(), receivedBooleanEvents.size(), "Number of Boolean "
+        Assert.assertEquals(receivedBooleanEvents.size(), publishedBooleanEvents.size(), "Number of Boolean "
                 + "Events received does not match the number published");
         for (int i = 0; i < publishedBooleanEvents.size(); i++) {
-            Assert.assertEquals(publishedBooleanEvents.get(i), receivedBooleanEvents.get(i),
+            Assert.assertEquals(receivedBooleanEvents.get(i), publishedBooleanEvents.get(i),
                                 "Received boolean event does not match the published boolean event");
         }
     }
@@ -154,10 +178,10 @@ public class BStreamValueTest {
 
         Assert.assertNotNull(publishedEvents);
         Assert.assertNotNull(receivedEvents);
-        Assert.assertEquals(publishedEvents.size(), receivedEvents.size(), "Number of Events received does not "
+        Assert.assertEquals(receivedEvents.size(), publishedEvents.size(), "Number of Events received does not "
                 + "match the number published");
         for (int i = 0; i < publishedEvents.size(); i++) {
-            Assert.assertEquals(publishedEvents.get(i), receivedEvents.get(i),
+            Assert.assertEquals(receivedEvents.get(i), publishedEvents.get(i),
                                 "Received event does not match the published event");
         }
     }
@@ -170,10 +194,11 @@ public class BStreamValueTest {
 
         Assert.assertNotNull(publishedEvents);
         Assert.assertNotNull(receivedEvents);
-        Assert.assertEquals(publishedEvents.size(), receivedEvents.size(), "Number of Events received does not "
-                + "match the number published");
+        Assert.assertEquals(receivedEvents.size(), publishedEvents.size(), "Number of Events received does not "
+                + "match the number published: Received" + receivedEvents.stringValue() + ", but Expected"
+                + publishedEvents.stringValue() + ", ");
         for (int i = 0; i < publishedEvents.size(); i++) {
-            Assert.assertEquals(publishedEvents.get(i), receivedEvents.get(i),
+            Assert.assertEquals(receivedEvents.get(i), publishedEvents.get(i),
                                 "Received event does not match the published event");
         }
     }
@@ -186,10 +211,10 @@ public class BStreamValueTest {
 
         Assert.assertNotNull(publishedEvents);
         Assert.assertNotNull(receivedEvents);
-        Assert.assertEquals(publishedEvents.size(), receivedEvents.size(), "Number of Events received does not "
+        Assert.assertEquals(receivedEvents.size(), publishedEvents.size(), "Number of Events received does not "
                 + "match the number published");
         for (int i = 0; i < publishedEvents.size(); i++) {
-            Assert.assertEquals(publishedEvents.get(i), receivedEvents.get(i),
+            Assert.assertEquals(receivedEvents.get(i), publishedEvents.get(i),
                                 "Received event does not match the published event");
         }
     }
@@ -203,10 +228,10 @@ public class BStreamValueTest {
 
         Assert.assertNotNull(publishedEvents);
         Assert.assertNotNull(receivedEvents);
-        Assert.assertEquals(publishedEvents.size(), receivedEvents.size(), "Number of Events received does not "
+        Assert.assertEquals(receivedEvents.size(), publishedEvents.size(), "Number of Events received does not "
                 + "match the number published");
         for (int i = 0; i < publishedEvents.size(); i++) {
-            Assert.assertEquals(publishedEvents.get(i), receivedEvents.get(i),
+            Assert.assertEquals(receivedEvents.get(i), publishedEvents.get(i),
                                 "Received event does not match the published event");
         }
     }

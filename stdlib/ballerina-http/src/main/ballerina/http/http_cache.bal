@@ -17,7 +17,11 @@
 
 import ballerina/cache;
 
-type HttpCache object {
+documentation {
+    Implements a cache for storing HTTP responses. This cache complies with the caching policy set when configuring
+    HTTP caching in the HTTP client endpoint.
+}
+public type HttpCache object {
 
     private {
         cache:Cache cache;
@@ -55,7 +59,7 @@ type HttpCache object {
             // will be read by the client and the response will be after the first cache hit.
             match inboundResponse.getBinaryPayload() {
                 blob => {}
-                mime:EntityError => {}
+                error => {}
             }
             log:printDebug("Adding new cache entry for: " + key);
             addEntry(cache, key, inboundResponse);

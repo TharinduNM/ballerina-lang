@@ -25,7 +25,7 @@ const { workspace } = require('vscode');
 
 let serverProcess;
 const libPath = '/bre/lib/*'
-const composerlibPath = '/resources/composer/services/*';
+const composerlibPath = '/lib/resources/composer/services/*';
 const main = 'org.ballerinalang.vscode.server.Main';
 
 let LSService;
@@ -40,7 +40,7 @@ function getClassPath() {
     let classpath = path.join(sdkPath, composerlibPath) + sep + path.join(sdkPath, libPath) + sep + jarPath;
 
     if (customClassPath) {
-        classpath =  path.join(customClassPath, '/*') + sep + classpath;
+        classpath =  customClassPath + sep + classpath;
     }
     return classpath;
 }
@@ -86,8 +86,11 @@ function startServices() {
                 args.push('-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005,quiet=y')
             }
 
+            const balHomePath = workspace.getConfiguration('ballerina').get('home');
+            const balHomeSysProp = `-Dballerina.home=${balHomePath}`;
+
             console.log('Starting parser service on: ', parserPort);
-            serverProcess = spawn('java', [...args, main, LSPort, parserPort]);
+            serverProcess = spawn('java', [balHomeSysProp, ...args, main, LSPort, parserPort]);
 
             serverProcess.stdout.on('data', (data) => {
                 console.log(`ls: ${data}`);

@@ -101,7 +101,7 @@ class WelcomeTab extends React.Component {
         });
         this.props.commandManager.dispatch(LAYOUT_COMMANDS.SHOW_VIEW, { id: WORKSPACE_VIEWS.EXPLORER });
         this.props.commandManager.dispatch(WORKSPACE_COMMANDS.OPEN_FILE, {
-            filePath: `${folderPath}${pathSeperator}${url}.bal`,
+            filePath: `${folderPath}${pathSeperator}${url.replace(/-/g, '_')}.bal`,
             ext: 'bal',
         });
     }
@@ -181,7 +181,7 @@ class WelcomeTab extends React.Component {
                                 className='btn-secondary'
                                 onClick={this.props.openFile}
                             >
-                                Create File
+                                Open File
                             </Button>
                         </Grid.Column>
                         {/* <Divider />
@@ -191,35 +191,31 @@ class WelcomeTab extends React.Component {
                             </Grid.Column>
                             <Grid.Column className='opened-wrapper'>
                                 <List.Item className='resentlyOpen'>
-                                    <i className='fw fw-folder-open'/> 
+                                    <i className='fw fw-folder-open'/>
                                     <span>serviceChaining</span>
                                 </List.Item>
                                 <List.Item className='resentlyOpen'>
-                                    <i className='fw fw-document'/> 
+                                    <i className='fw fw-document'/>
                                     <span>ATMLocatorService.bal</span>
                                 </List.Item>
                                 <List.Item className='resentlyOpen'>
-                                    <i className='fw fw-document'/> 
+                                    <i className='fw fw-document'/>
                                     <span>echoService.bal</span>
                                 </List.Item>
                                 <List.Item className='resentlyOpen'>
-                                    <i className='fw fw-folder-open'/> 
+                                    <i className='fw fw-folder-open'/>
                                     <span>serviceChaining</span>
                                 </List.Item>
                                 <List.Item className='resentlyOpen'>
-                                    <i className='fw fw-document'/> 
+                                    <i className='fw fw-document'/>
                                     <span>nyseStockQuoteService.bal</span>
                                 </List.Item>
                             </Grid.Column>
                         </Grid.Column> */}
                     </Grid.Column>
                     <Grid.Column mobile={9} tablet={11} computer={13} className='rightContainer'>
-                        <div className='ballerina-by-example'>
-                            <h2>Ballerina by Example</h2>
-                            <p>Ballerina by Example enables you to have complete coverage over the language, while emphasizing incremental learning. This is a series of commented example programs.</p>
-                            
-                        </div>
-                        <Grid padded>
+                        <h2>Examples</h2>
+                        <Grid>
                             <Grid.Row columns={4} className='sample-wrapper'>
                                 <Grid.Column mobile={16} tablet={16} computer={4} className=''>
                                     {samples[0].map(column => this.renderColumnItem(column))}

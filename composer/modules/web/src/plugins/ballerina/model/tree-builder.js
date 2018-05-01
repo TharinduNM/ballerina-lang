@@ -150,20 +150,32 @@ class TreeBuilder {
             node.global = true;
         }
 
-        if (node.kind === 'VariableDef' && node.variable.typeNode && node.variable.typeNode.kind === 'EndpointType') {
-            node.variable.endpoint = true;
-            node.endpoint = true;
+        if (node.kind === 'VariableDef' && node.variable.typeNode) {
+            if (node.variable.typeNode.kind === 'EndpointType') {
+                node.variable.endpoint = true;
+                node.endpoint = true;
+            }
         }
 
-        if (node.kind === 'Variable' && node.initialExpression && node.initialExpression.async) {
-            if (node.ws) {
-                let wsLength = node.ws.length;
-                for (let i = 0; i < wsLength; i++) {
-                    if (node.ws[i].text === 'start') {
-                        if (node.initialExpression.ws) {
-                            node.initialExpression.ws.splice(0, 0, node.ws[i]);
-                            node.ws.splice(i, 1);
+        if (node.kind === 'Variable') {
+            if (node.initialExpression && node.initialExpression.async) {
+                if (node.ws) {
+                    for (let i = 0; i < node.ws.length; i++) {
+                        if (node.ws[i].text === 'start') {
+                            if (node.initialExpression.ws) {
+                                node.initialExpression.ws.splice(0, 0, node.ws[i]);
+                                node.ws.splice(i, 1);
+                            }
                         }
+                    }
+                }
+            }
+
+            if (node.typeNode && node.typeNode.nullable && node.typeNode.ws) {
+                for (let i = 0; i < node.typeNode.ws.length; i++) {
+                    if (node.typeNode.ws[i].text === '?') {
+                        node.typeNode.nullableOperatorAvailable = true;
+                        break;
                     }
                 }
             }
@@ -221,8 +233,7 @@ class TreeBuilder {
                 if (node.ws) {
                     for (let i = 0; i < node.ws.length; i++) {
                         if (node.ws[i].text === ')' && node.ws[i + 1].text !== 'returns') {
-                            let returnTypeWsLength = node.returnTypeNode.ws.length;
-                            for (let j = 0; j < returnTypeWsLength; j++) {
+                            for (let j = 0; j < node.returnTypeNode.ws.length; j++) {
                                 if (node.returnTypeNode.ws[j].text === 'returns') {
                                     node.ws.splice((i + 1), 0, node.returnTypeNode.ws[j]);
                                     node.returnTypeNode.ws.splice(j, 1);
@@ -301,6 +312,15 @@ class TreeBuilder {
                 node.noExpressionAvailable = true;
             }
 
+            if (node.ws) {
+                for (let i = 0; i < node.ws.length; i++) {
+                    if (node.ws[i].text === "(") {
+                        node.hasParantheses = true;
+                        break;
+                    }
+                }
+            }
+
             if (!node.type) {
                 node.noTypeAttached = true;
             } else {
@@ -324,8 +344,7 @@ class TreeBuilder {
             for (let j = 0; j < node.attributes.length; j++) {
                 let attribute = node.attributes[j];
                 if (attribute.ws) {
-                    let wsLength = attribute.ws.length;
-                    for (let i = 0; i < wsLength; i++) {
+                    for (let i = 0; i < attribute.ws.length; i++) {
                         let text = attribute.ws[i].text;
                         if (text.includes('{{') && !attribute.paramType) {
                             let lastIndex = text.indexOf('{{');
@@ -345,6 +364,24 @@ class TreeBuilder {
             if (node.restParameters) {
                 node.restParameters.rest = true;
             }
+        }
+
+        if (node.kind === 'PostIncrement') {
+            node.operator = node.operatorKind + node.operatorKind;
+        }
+
+        if (node.kind === 'SelectExpression' && node.identifier) {
+            node.identifierAvailable = true;
+        }
+
+        if (node.kind === 'StreamAction' && node.invokableBody) {
+            if (node.invokableBody.functionNode) {
+                node.invokableBody.functionNode.isStreamAction = true;
+            }
+        }
+
+        if (node.kind === 'StreamingInput' && node.alias) {
+            node.aliasAvailable = true;
         }
     }
 

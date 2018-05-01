@@ -16,10 +16,10 @@ public function getEvents () returns (json) {
                         var jsonRes = resp.getJsonPayload();
                         match jsonRes {
                             json payload => return payload;
-                            mime:EntityError err => io:println(err);
+                            error err => io:println(err);
                         }
                    }
-                   http:HttpConnectorError err => io:println(err);
+                   error err => io:println(err);
     }
 
     return {};
